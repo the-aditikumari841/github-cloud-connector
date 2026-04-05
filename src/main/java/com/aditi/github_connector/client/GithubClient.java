@@ -21,6 +21,10 @@ public class GithubClient {
                 .uri("/users/{username}/repos", username)
                 .header("Authorization", "Bearer " + tokenProvider.getPatToken())
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException(response.statusCode().value() + ":" + errorBody))
+                )
                 .bodyToFlux(RepoResponse.class)
                 .collectList()
                 .block();
@@ -32,6 +36,10 @@ public class GithubClient {
                 .header("Authorization", "Bearer " + tokenProvider.getPatToken())
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(status -> status.isError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException(response.statusCode().value() + ":" + errorBody))
+                )
                 .bodyToMono(IssueResponse.class)
                 .block();
     }
@@ -41,6 +49,10 @@ public class GithubClient {
                 .uri("/user/repos")
                 .header("Authorization", "Bearer " + tokenProvider.getPatToken())
                 .retrieve()
+                .onStatus(status -> status.isError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException(response.statusCode().value() + ":" + errorBody))
+                )
                 .bodyToFlux(RepoResponse.class)
                 .collectList()
                 .block();
