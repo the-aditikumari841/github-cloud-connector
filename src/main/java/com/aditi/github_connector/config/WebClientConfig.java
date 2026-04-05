@@ -11,10 +11,9 @@ public class WebClientConfig {
     private String token;
 
     @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
+    public WebClient webClient(WebClient.Builder builder) {
+        return builder
                 .baseUrl("https://api.github.com")
-                .defaultHeader("Authorization", "Bearer " + token)
                 .defaultHeader("Accept", "application/vnd.github+json")
                 .build();
     }
