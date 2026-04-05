@@ -36,4 +36,13 @@ public class GithubClient {
                 .block();
     }
 
+    public List<RepoResponse> getMyRepos() {
+        return webClient.get()
+                .uri("/user/repos")
+                .header("Authorization", "Bearer " + tokenProvider.getPatToken())
+                .retrieve()
+                .bodyToFlux(RepoResponse.class)
+                .collectList()
+                .block();
+    }
 }

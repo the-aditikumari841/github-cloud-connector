@@ -26,4 +26,7 @@ public class GithubService {
         );
     }
 
+    public List<RepoResponse> fetchMyRepositories() {
+        return githubClient.getMyRepos();
+    }
 }

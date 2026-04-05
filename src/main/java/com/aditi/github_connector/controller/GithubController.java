@@ -22,6 +22,11 @@ public class GithubController {
         return ResponseEntity.ok(githubService.fetchRepositories(username));
     }
 
+    @GetMapping("/my-repos")
+    public ResponseEntity<List<RepoResponse>> getMyRepos() {
+        return ResponseEntity.ok(githubService.fetchMyRepositories());
+    }
+
     @PostMapping("/issues")
     public ResponseEntity<IssueResponse> createIssue(@RequestBody CreateIssueRequest request) {
         return ResponseEntity.ok(githubService.createIssue(request));
