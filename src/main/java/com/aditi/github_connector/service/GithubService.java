@@ -1,6 +1,6 @@
 package com.aditi.github_connector.service;
 
-import com.aditi.github_connector.client.GithubClient;
+import com.aditi.github_connector.client.github.GithubClient;
 import com.aditi.github_connector.dto.request.CreateIssueRequest;
 import com.aditi.github_connector.dto.response.IssueResponse;
 import com.aditi.github_connector.dto.response.RepoResponse;

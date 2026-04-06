@@ -1,4 +1,4 @@
-package com.aditi.github_connector.client;
+package com.aditi.github_connector.client.github;
 
 import com.aditi.github_connector.dto.request.CreateIssueRequest;
 import com.aditi.github_connector.dto.response.IssueResponse;
@@ -19,7 +19,7 @@ public class GithubClient {
     public List<RepoResponse> getUserRepos(String username) {
         return webClient.get()
                 .uri("/users/{username}/repos", username)
-                .header("Authorization", "Bearer " + tokenProvider.getPatToken())
+                .header("Authorization", "Bearer " + tokenProvider.getToken())
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> response.bodyToMono(String.class)
@@ -33,7 +33,7 @@ public class GithubClient {
     public IssueResponse createIssue(String owner, String repo, CreateIssueRequest request) {
         return webClient.post()
                 .uri("/repos/{owner}/{repo}/issues", owner, repo)
-                .header("Authorization", "Bearer " + tokenProvider.getPatToken())
+                .header("Authorization", "Bearer " + tokenProvider.getToken())
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(status -> status.isError(),
@@ -47,7 +47,7 @@ public class GithubClient {
     public List<RepoResponse> getMyRepos() {
         return webClient.get()
                 .uri("/user/repos")
-                .header("Authorization", "Bearer " + tokenProvider.getPatToken())
+                .header("Authorization", "Bearer " + tokenProvider.getToken())
                 .retrieve()
                 .onStatus(status -> status.isError(),
                         response -> response.bodyToMono(String.class)

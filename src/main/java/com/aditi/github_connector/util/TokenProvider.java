@@ -9,7 +9,18 @@ public class TokenProvider {
     @Value("${github.token}")
     private String patToken;
 
-    public String getPatToken() {
+    private String oauthToken;
+
+    public String getToken() {
+        if(oauthToken != null) {
+            System.out.println("Using OAuth Token");
+            return oauthToken;
+        }
+        System.out.println("Using PAT Token");
         return patToken;
+    }
+
+    public void setOAuthToken(String token) {
+        this.oauthToken = token;
     }
 }

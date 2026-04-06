@@ -1,2 +1,9 @@
 github:
   token: ${GITHUB_TOKEN}
+
+oauth:
+  github:
+    client-id: ${GITHUB_CLIENT_ID:dummy}
+    client-secret: ${GITHUB_CLIENT_SECRET:dummy}
+    redirect-uri: http://localhost:8080/auth/github/callback
+
