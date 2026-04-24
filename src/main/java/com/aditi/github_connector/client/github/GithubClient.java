@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
@@ -55,6 +56,17 @@ public class GithubClient {
                 )
                 .bodyToFlux(RepoResponse.class)
                 .collectList()
+                .block();
+    }
+
+    public void commentOnPr(String owner, String repo, int prNumber, String comment) {
+        webClient.post()
+                .uri("/repos/{owner}/{repo}/issues/{prNumber}/comments",
+                        owner, repo, prNumber)
+                .header("Authorization", "Bearer " + tokenProvider.getToken())
+                .bodyValue(Map.of("body", comment))
+                .retrieve()
+                .bodyToMono(Void.class)
                 .block();
     }
 }
