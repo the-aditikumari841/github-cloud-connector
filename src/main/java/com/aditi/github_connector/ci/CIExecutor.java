@@ -17,16 +17,24 @@ public class CIExecutor {
             ProcessBuilder builder = new ProcessBuilder(
                     "git", "clone", repoUrl, dir
             );
-            builder.inheritIO();
+//            builder.inheritIO();
 
+            builder.redirectErrorStream(true);
             Process process = builder.start();
-            int exitCode = process.waitFor();
+//            int exitCode = process.waitFor();
 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            int exitCode = process.waitFor();
             if (exitCode != 0) {
                 throw new RuntimeException("clone failed with exit code " + exitCode);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Clone failed" + e.getMessage(), e);
+            throw new RuntimeException("Clone failed: " + e.getMessage(), e);
         }
         return dir;
     }

@@ -12,8 +12,13 @@ public class AnalysisService {
     private final GithubClient githubClient;
 
     public void analyze(String owner, String repo, String cloneUrl, int prNumber){
+        System.out.println("Step 1: cloning repo... ");
         String repoPath = ciExecutor.cloneRepo(cloneUrl);
+
+        System.out.println("Step 2: Running checkstyle... ");
         String result = ciExecutor.runCheckStyle(repoPath);
+
+        System.out.println("Step 3: Posting comment ");
         String comment = formatComment(result);
 
         githubClient.commentOnPr(owner, repo, prNumber, comment);
