@@ -21,6 +21,14 @@ public class AnalysisService {
     }
 
     private String formatComment(String result) {
-        return "### Code Review Result\n\n" + result;
+        String summary = result.contains("BUILD SUCCESS")
+                ? "Checkstyle Passed"
+                : "Checkstyle Issues Found";
+
+        return "### Code Review Results ###\n"
+                + summary + "\n\n"
+                + "```\n"
+                + result.substring(0, Math.min(result.length(), 2000))
+                + "\n```";
     }
 }
