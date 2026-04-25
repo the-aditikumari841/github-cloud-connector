@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 @Component
 public class CIExecutor {
     public String cloneRepo(String repoUrl) {
-        String dir = "repo-" + System.currentTimeMillis();
+        String dir = System.getProperty("java.io.tmpdir")
+                + File.separator
+                + "repo-" + System.currentTimeMillis();
 
         try {
             ProcessBuilder builder = new ProcessBuilder(
