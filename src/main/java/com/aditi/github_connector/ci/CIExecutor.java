@@ -42,15 +42,17 @@ public class CIExecutor {
     public String runCheckStyle(String repoPath) {
         try {
             ProcessBuilder builder = new ProcessBuilder(
-                    "mvn", "checkstyle:check"
+                    "mvn.cmd", "checkstyle:check"
             );
             builder.directory(new File(repoPath));
             builder.redirectErrorStream(true);
 
             Process process = builder.start();
+
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream())
             );
+
             StringBuilder output = new StringBuilder();
             String line;
 
@@ -59,9 +61,14 @@ public class CIExecutor {
             }
 
             int exitCode = process.waitFor();
+            System.out.println("====CHECKSTYLE OUTPUT====");
+            System.out.println(output.toString());
+            System.out.println("Checkstyle finished with exit code " + exitCode);
+
             if(exitCode != 0) {
                 output.append("\n (Checkstyle found issues)");
             }
+
             return output.toString();
         } catch (Exception e) {
             throw new RuntimeException("Checkstyle execution failed: " + e.getMessage(), e);
