@@ -29,7 +29,7 @@ public class AnalysisService {
     }
 
     private String formatComment(String result) {
-        String[] lines = result.split("\n");
+        String[] lines = result.split("\\r?\\n");
 
         StringBuilder issues = new StringBuilder();
         int count = 0;
