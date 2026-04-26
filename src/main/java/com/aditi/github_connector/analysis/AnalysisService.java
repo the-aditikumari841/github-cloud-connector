@@ -43,13 +43,22 @@ public class AnalysisService {
                 int firstColonIndex = cleaned.indexOf(':');
 //                int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
 
-                int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
+//                int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
+//
+//                if(lastSlash != -1 && firstColonIndex != -1
+//                        && lastSlash < firstColonIndex
+//                        && cleaned.contains(".")) {
+//
+//                        cleaned = cleaned.substring(lastSlash + 1);
+//                }
 
-                if(lastSlash != -1 && firstColonIndex != -1
-                        && lastSlash < firstColonIndex
-                        && cleaned.contains(".")) {
-
-                        cleaned = cleaned.substring(lastSlash + 1);
+                if(firstColonIndex != -1){
+                    String beforeColon =  cleaned.substring(0, firstColonIndex);
+                    int lastSlash = Math.max(beforeColon.lastIndexOf("\\"), beforeColon.lastIndexOf("/"));
+                    if(lastSlash != -1){
+                        String fileName = beforeColon.substring(lastSlash + 1);
+                        cleaned = fileName + cleaned.substring(firstColonIndex);
+                    }
                 }
 
                 issues.append("• ").append(cleaned).append("\n");
