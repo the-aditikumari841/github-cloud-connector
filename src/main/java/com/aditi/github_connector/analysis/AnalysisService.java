@@ -36,9 +36,9 @@ public class AnalysisService {
 
                 String cleaned = line.replaceFirst("\\[WARN\\]\\s*", "");
 
-                if(cleaned.contains("repo-")) {
-                    cleaned = cleaned.replaceAll(".*repo-\\d+\\\\", "");
-                }
+//                if(cleaned.contains("repo-")) {
+//                    cleaned = cleaned.replaceAll(".*repo-\\d+\\\\", "");
+//                }
 
                 int firstColonIndex = cleaned.indexOf(':');
                 int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
