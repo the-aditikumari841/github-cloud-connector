@@ -38,8 +38,9 @@ public class AnalysisService {
                         replaceAll(".*repo-\\d+\\\\", "")
                         .replaceFirst("\\[WARN\\]\\s*", "");
 
+                int colonIndex = cleaned.indexOf(':');
                 int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
-                if(lastSlash != -1) {
+                if(lastSlash != -1 && colonIndex != -1 &&lastSlash < colonIndex) {
                         cleaned = cleaned.substring(lastSlash + 1);
                 }
 
