@@ -23,7 +23,10 @@ public class CIExecutor {
             Process process = builder.start();
 //            int exitCode = process.waitFor();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            );
+
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
@@ -49,15 +52,18 @@ public class CIExecutor {
             ProcessBuilder builder;
 
             if (mvnwFile.exists()) {
-                builder = new ProcessBuilder("mvnw.cmd", "checkstyle:check");
+                builder = new ProcessBuilder("cmd","/c","mvnw.cmd", "checkstyle:check");
                 System.out.println("Using Maven wrapper (mvnw.cmd)");
             } else {
-                builder = new ProcessBuilder("mvn.cmd", "checkstyle:check");
+                builder = new ProcessBuilder("cmd","/c","mvn.cmd", "checkstyle:check");
                 System.out.println("Using System Maven (mvn.cmd)");
             }
 
             builder.directory(repoDir);
             builder.redirectErrorStream(true);
+
+            System.out.println("Running command: " + builder.command());
+            System.out.println("Working directory: " + repoDir.getAbsolutePath());
 
             Process process = builder.start();
 
