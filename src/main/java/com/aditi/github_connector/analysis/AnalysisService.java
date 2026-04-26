@@ -41,10 +41,11 @@ public class AnalysisService {
 //                }
 
                 int firstColonIndex = cleaned.indexOf(':');
-                int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
+//                int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
 
                 int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
-                if(lastSlash != -1 && firstColonIndex != -1 && secondColonIndex != -1 && lastSlash < firstColonIndex) {
+
+                if(lastSlash != -1 && firstColonIndex != -1 && lastSlash < firstColonIndex) {
                         cleaned = cleaned.substring(lastSlash + 1);
                 }
 
