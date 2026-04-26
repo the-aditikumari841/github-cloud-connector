@@ -60,7 +60,7 @@ public class AnalysisService {
                         cleaned = fileName + cleaned.substring(firstColonIndex);
                     }
                 }
-
+//
                 issues.append("• ").append(cleaned).append("\n");
 
                 if(count >= 20) {
