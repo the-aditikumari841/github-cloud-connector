@@ -36,7 +36,8 @@ public class AnalysisService {
 
                 String cleaned = line.
                         replaceAll(".*repo-\\d+\\\\", "")
-                        .replaceFirst("\\[WARN\\]\\s*", "");
+                        .replaceFirst("\\[WARN\\]\\s*", "")
+                        .replaceAll(".*\\\\", "");
 
                 issues.append("• ").append(cleaned).append("\n");
 
