@@ -36,8 +36,12 @@ public class AnalysisService {
 
                 String cleaned = line.
                         replaceAll(".*repo-\\d+\\\\", "")
-                        .replaceFirst("\\[WARN\\]\\s*", "")
-                        .replaceAll(".*\\\\", "");
+                        .replaceFirst("\\[WARN\\]\\s*", "");
+
+                int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
+                if(lastSlash != -1) {
+                        cleaned = cleaned.substring(lastSlash + 1);
+                }
 
                 issues.append("• ").append(cleaned).append("\n");
 
