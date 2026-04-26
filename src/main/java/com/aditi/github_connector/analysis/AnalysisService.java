@@ -5,6 +5,9 @@ import com.aditi.github_connector.client.github.GithubClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 @RequiredArgsConstructor
 public class AnalysisService {
@@ -30,17 +33,41 @@ public class AnalysisService {
 
         StringBuilder issues = new StringBuilder();
         int count = 0;
+
+        Pattern pattern = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
+
         for (String line : lines) {
             if (line.contains("[WARN]")) {
                 count++;
 
                 String cleaned = line.replaceFirst("\\[WARN\\]\\s*", "");
 
+                Matcher matcher = pattern.matcher(cleaned);
+
+                if(matcher.find()){
+                    String filePath = matcher.group(1);
+                    String lineNo = matcher.group(2);
+                    String colNo = matcher.group(3);
+                    String message = matcher.group(4);
+
+                    int lastSlash = Math.max(
+                            filePath.lastIndexOf("/"),
+                            filePath.lastIndexOf("\\")
+                    );
+
+                    String fileName = (lastSlash != -1)
+                            ? filePath.substring(lastSlash + 1)
+                            : filePath;
+
+                    cleaned = fileName + ":" + lineNo + ":" + colNo + ": " + message;
+                }
+
 //                if(cleaned.contains("repo-")) {
 //                    cleaned = cleaned.replaceAll(".*repo-\\d+\\\\", "");
 //                }
 
-                int firstColonIndex = cleaned.indexOf(':');
+//                int firstColonIndex = cleaned.indexOf(':');
+
 //                int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
 
 //                int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
@@ -52,15 +79,28 @@ public class AnalysisService {
 //                        cleaned = cleaned.substring(lastSlash + 1);
 //                }
 
-                if(firstColonIndex != -1){
-                    String beforeColon =  cleaned.substring(0, firstColonIndex);
-                    int lastSlash = Math.max(beforeColon.lastIndexOf("\\"), beforeColon.lastIndexOf("/"));
-                    if(lastSlash != -1){
-                        String fileName = beforeColon.substring(lastSlash + 1);
-                        cleaned = fileName + cleaned.substring(firstColonIndex);
-                    }
-                }
+//                if(firstColonIndex == -1){
+//                    issues.append("• ").append(cleaned).append("\n");
+//                    continue;
+//                }
 //
+//                String beforeColon = cleaned.substring(0, firstColonIndex);
+//                int lastSlash = Math.max(beforeColon.lastIndexOf('/'), beforeColon.lastIndexOf('\\'));
+//
+//                if(lastSlash != -1 ) {
+//                    String fileName = beforeColon.substring(lastSlash + 1);
+//                    cleaned = fileName + cleaned.substring(firstColonIndex);
+//                }
+
+//                if(firstColonIndex != -1){
+//                    String beforeColon =  cleaned.substring(0, firstColonIndex);
+//                    int lastSlash = Math.max(beforeColon.lastIndexOf("\\"), beforeColon.lastIndexOf("/"));
+//                    if(lastSlash != -1){
+//                        String fileName = beforeColon.substring(lastSlash + 1);
+//                        cleaned = fileName + cleaned.substring(firstColonIndex);
+//                    }
+//                }
+
                 issues.append("• ").append(cleaned).append("\n");
 
                 if(count >= 20) {
