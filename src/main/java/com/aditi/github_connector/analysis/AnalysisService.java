@@ -36,20 +36,24 @@ public class AnalysisService {
 
                 String cleaned = line.
                         replaceAll(".*repo-\\d+\\\\", "")
-                        .replace("[WARN]", "");
+                        .replaceFirst("\\[WARN\\]\\s*", "");
 
                 issues.append("• ").append(cleaned).append("\n");
 
                 if(count >= 20) {
-                    issues.append("\n and more issues (truncated)");
+                    issues.append("\n...and more issues (truncated)");
                     break;
                 }
             }
         }
 
-        String summary = count == 0 ? "Checkstyle Passed" : "Checkstyle Issues Found";
+        String summary = count == 0
+                ? "Checkstyle Passed"
+                : "Checkstyle Issues Found";
 
-        return "### Code Review Results\n\n" + summary + "\n\n" + "Total issues:** " + count + "\n\n"
+        return "### Code Review Results\n\n"
+                + summary + "\n\n"
+                + "**Total issues:** " + count + "\n\n"
                 + (count > 0 ? "**Issues:**\n" + issues : "")
                 + "\n---\n_Reviewed automatically by CI Bot_";
     }
