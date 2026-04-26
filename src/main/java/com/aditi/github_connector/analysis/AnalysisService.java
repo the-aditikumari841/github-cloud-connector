@@ -36,78 +36,32 @@ public class AnalysisService {
 
         Pattern pattern = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
+        StringBuilder current = new StringBuilder();
+
         for (String line : lines) {
-            if (line.contains("[WARN]")) {
-                count++;
+            if (line.matches("\\[(WARN|ERROR)]\\s.*")) {
 
-                String cleaned = line.replaceFirst("\\[WARN\\]\\s*", "");
+                if (current.length() > 0) {
+                    count++;
+                    processIssue(current.toString(), issues, pattern);
 
-                Matcher matcher = pattern.matcher(cleaned);
-
-                if(matcher.find()){
-                    String filePath = matcher.group(1);
-                    String lineNo = matcher.group(2);
-                    String colNo = matcher.group(3);
-                    String message = matcher.group(4);
-
-                    int lastSlash = Math.max(
-                            filePath.lastIndexOf("/"),
-                            filePath.lastIndexOf("\\")
-                    );
-
-                    String fileName = (lastSlash != -1)
-                            ? filePath.substring(lastSlash + 1)
-                            : filePath;
-
-                    cleaned = fileName + ":" + lineNo + ":" + colNo + ": " + message;
+                    if(count >= 20) {
+                        issues.append("\n...and more issues (truncated)");
+                        break;
+                    }
+                    current.setLength(0);
                 }
-
-//                if(cleaned.contains("repo-")) {
-//                    cleaned = cleaned.replaceAll(".*repo-\\d+\\\\", "");
-//                }
-
-//                int firstColonIndex = cleaned.indexOf(':');
-
-//                int secondColonIndex = cleaned.indexOf(':', firstColonIndex + 1);
-
-//                int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
-//
-//                if(lastSlash != -1 && firstColonIndex != -1
-//                        && lastSlash < firstColonIndex
-//                        && cleaned.contains(".")) {
-//
-//                        cleaned = cleaned.substring(lastSlash + 1);
-//                }
-
-//                if(firstColonIndex == -1){
-//                    issues.append("• ").append(cleaned).append("\n");
-//                    continue;
-//                }
-//
-//                String beforeColon = cleaned.substring(0, firstColonIndex);
-//                int lastSlash = Math.max(beforeColon.lastIndexOf('/'), beforeColon.lastIndexOf('\\'));
-//
-//                if(lastSlash != -1 ) {
-//                    String fileName = beforeColon.substring(lastSlash + 1);
-//                    cleaned = fileName + cleaned.substring(firstColonIndex);
-//                }
-
-//                if(firstColonIndex != -1){
-//                    String beforeColon =  cleaned.substring(0, firstColonIndex);
-//                    int lastSlash = Math.max(beforeColon.lastIndexOf("\\"), beforeColon.lastIndexOf("/"));
-//                    if(lastSlash != -1){
-//                        String fileName = beforeColon.substring(lastSlash + 1);
-//                        cleaned = fileName + cleaned.substring(firstColonIndex);
-//                    }
-//                }
-
-                issues.append("• ").append(cleaned).append("\n");
-
-                if(count >= 20) {
-                    issues.append("\n...and more issues (truncated)");
-                    break;
+                current.append(line);
+            } else {
+                if (current.length() > 0) {
+                    current.append(" ").append(line.trim());
                 }
             }
+        }
+
+        if(current.length() > 0 && count < 20) {
+            count++;
+            processIssue(current.toString(), issues, pattern);
         }
 
         String summary = count == 0
@@ -119,5 +73,30 @@ public class AnalysisService {
                 + "**Total issues:** " + count + "\n\n"
                 + (count > 0 ? "**Issues:**\n" + issues : "")
                 + "\n---\n_Reviewed automatically by CI Bot_";
+    }
+
+    private void processIssue(String line, StringBuilder issues, Pattern pattern){
+        String cleaned = line.replaceFirst("\\[(WARN|ERROR)]\\s*", "");
+
+        Matcher matcher = pattern.matcher(cleaned);
+
+        if(matcher.find()){
+            String filePath = matcher.group(1);
+            String lineNo = matcher.group(2);
+            String colNo = matcher.group(3);
+            String message = matcher.group(4);
+
+            int lastSlash = Math.max(
+                    filePath.lastIndexOf("/"),
+                    filePath.lastIndexOf("\\")
+            );
+
+            String fileName = (lastSlash != -1)
+                    ? filePath.substring(lastSlash + 1)
+                    : filePath;
+
+            cleaned = fileName + ":" + lineNo + ":" + colNo + ": " + message;
+        }
+        issues.append("• ").append(cleaned).append("\n");
     }
 }
