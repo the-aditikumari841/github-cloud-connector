@@ -26,14 +26,31 @@ public class AnalysisService {
     }
 
     private String formatComment(String result) {
-        String summary = result.contains("BUILD SUCCESS")
-                ? "Checkstyle Passed"
-                : "Checkstyle Issues Found";
+        String[] lines = result.split("\n");
 
-        return "### Code Review Results ###\n"
-                + summary + "\n\n"
-                + "```\n"
-                + result.substring(0, Math.min(result.length(), 2000))
-                + "\n```";
+        StringBuilder issues = new StringBuilder();
+        int count = 0;
+        for (String line : lines) {
+            if (line.contains("[WARN]")) {
+                count++;
+
+                String cleaned = line.
+                        replaceAll(".*repo-\\d+\\\\", "")
+                        .replace("[WARN]", "");
+
+                issues.append("• ").append(cleaned).append("\n");
+
+                if(count >= 20) {
+                    issues.append("\n and more issues (truncated)");
+                    break;
+                }
+            }
+        }
+
+        String summary = count == 0 ? "Checkstyle Passed" : "Checkstyle Issues Found";
+
+        return "### Code Review Results\n\n" + summary + "\n\n" + "Total issues:** " + count + "\n\n"
+                + (count > 0 ? "**Issues:**\n" + issues : "")
+                + "\n---\n_Reviewed automatically by CI Bot_";
     }
 }
