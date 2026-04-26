@@ -45,7 +45,10 @@ public class AnalysisService {
 
                 int lastSlash = Math.max(cleaned.lastIndexOf("\\"), cleaned.lastIndexOf("/"));
 
-                if(lastSlash != -1 && firstColonIndex != -1 && lastSlash < firstColonIndex) {
+                if(lastSlash != -1 && firstColonIndex != -1
+                        && lastSlash < firstColonIndex
+                        && cleaned.contains(".")) {
+
                         cleaned = cleaned.substring(lastSlash + 1);
                 }
 
