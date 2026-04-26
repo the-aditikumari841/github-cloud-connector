@@ -41,10 +41,22 @@ public class CIExecutor {
 
     public String runCheckStyle(String repoPath) {
         try {
-            ProcessBuilder builder = new ProcessBuilder(
-                    "mvn.cmd", "checkstyle:check"
-            );
-            builder.directory(new File(repoPath));
+
+            File repoDir = new File(repoPath);
+
+            File mvnwFile = new File(repoDir, "mvnw.cmd");
+
+            ProcessBuilder builder;
+
+            if (mvnwFile.exists()) {
+                builder = new ProcessBuilder("mvnw.cmd", "checkstyle:check");
+                System.out.println("Using Maven wrapper (mvnw.cmd)");
+            } else {
+                builder = new ProcessBuilder("mvn.cmd", "checkstyle:check");
+                System.out.println("Using System Maven (mvn.cmd)");
+            }
+
+            builder.directory(repoDir);
             builder.redirectErrorStream(true);
 
             Process process = builder.start();
@@ -66,11 +78,12 @@ public class CIExecutor {
             System.out.println("Checkstyle finished with exit code " + exitCode);
 
             if(exitCode != 0) {
-                output.append("\n (Checkstyle found issues)");
+                output.append("\n(Checkstyle found issues)");
             }
 
             return output.toString();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Checkstyle execution failed: " + e.getMessage(), e);
         }
     }
