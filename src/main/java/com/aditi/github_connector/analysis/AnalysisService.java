@@ -37,6 +37,7 @@ public class AnalysisService {
         Pattern pattern = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
 //        StringBuilder current = new StringBuilder();
+
         StringBuilder buffer = new StringBuilder();
 
         for (String line : lines) {
