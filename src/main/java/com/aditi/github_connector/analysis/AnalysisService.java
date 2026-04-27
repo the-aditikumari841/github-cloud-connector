@@ -36,33 +36,79 @@ public class AnalysisService {
 
         Pattern pattern = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
-        StringBuilder current = new StringBuilder();
+//        StringBuilder current = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
 
         for (String line : lines) {
-            if (line.matches("\\[(WARN|ERROR)]\\s.*")) {
-
-                if (current.length() > 0) {
-                    count++;
-                    processIssue(current.toString(), issues, pattern);
-
-                    if(count >= 20) {
-                        issues.append("\n...and more issues (truncated)");
-                        break;
-                    }
-                    current.setLength(0);
-                }
-                current.append(line);
+            if (buffer.length() > 0) {
+                buffer.append(" ").append(line.trim());
             } else {
-                if (current.length() > 0) {
-                    current.append(" ").append(line.trim());
+                buffer.append(line.trim());
+            }
+
+            String candidate = buffer.toString();
+            Matcher matcher = pattern.matcher(candidate);
+            if (matcher.find()) {
+                count++;
+                String filePath = matcher.group(1);
+                String lineNo = matcher.group(2);
+                String colNo = matcher.group(3);
+                String message = matcher.group(4);
+
+                int lastSlash = Math.max(
+                        filePath.lastIndexOf('/'),
+                        filePath.lastIndexOf('\\')
+                );
+
+                String fileName = (lastSlash != -1)
+                        ? filePath.substring(lastSlash + 1)
+                        : filePath;
+
+                issues.append("• ")
+                        .append(fileName)
+                        .append(":")
+                        .append(lineNo)
+                        .append(":")
+                        .append(colNo)
+                        .append(":")
+                        .append(message)
+                        .append("\n");
+
+                if (count >= 20) {
+                    issues.append("\n...and more issues (truncated)");
+                    break;
                 }
+
+                buffer.setLength(0);
+
             }
         }
 
-        if(current.length() > 0 && count < 20) {
-            count++;
-            processIssue(current.toString(), issues, pattern);
-        }
+//        for (String line : lines) {
+//            if (line.matches("\\[(WARN|ERROR)]\\s.*")) {
+//
+//                if (current.length() > 0) {
+//                    count++;
+//                    processIssue(current.toString(), issues, pattern);
+//
+//                    if(count >= 20) {
+//                        issues.append("\n...and more issues (truncated)");
+//                        break;
+//                    }
+//                    current.setLength(0);
+//                }
+//                current.append(line);
+//            } else {
+//                if (current.length() > 0) {
+//                    current.append(" ").append(line.trim());
+//                }
+//            }
+//        }
+
+//        if(current.length() > 0 && count < 20) {
+//            count++;
+//            processIssue(current.toString(), issues, pattern);
+//        }
 
         String summary = count == 0
                 ? "Checkstyle Passed"
