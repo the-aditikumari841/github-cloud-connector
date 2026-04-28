@@ -36,8 +36,6 @@ public class AnalysisService {
 
         Pattern pattern = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
-//        StringBuilder current = new StringBuilder();
-
         StringBuilder buffer = new StringBuilder();
 
         for (String line : lines) {
@@ -84,32 +82,6 @@ public class AnalysisService {
 
             }
         }
-
-//        for (String line : lines) {
-//            if (line.matches("\\[(WARN|ERROR)]\\s.*")) {
-//
-//                if (current.length() > 0) {
-//                    count++;
-//                    processIssue(current.toString(), issues, pattern);
-//
-//                    if(count >= 20) {
-//                        issues.append("\n...and more issues (truncated)");
-//                        break;
-//                    }
-//                    current.setLength(0);
-//                }
-//                current.append(line);
-//            } else {
-//                if (current.length() > 0) {
-//                    current.append(" ").append(line.trim());
-//                }
-//            }
-//        }
-
-//        if(current.length() > 0 && count < 20) {
-//            count++;
-//            processIssue(current.toString(), issues, pattern);
-//        }
 
         String summary = count == 0
                 ? "Checkstyle Passed"

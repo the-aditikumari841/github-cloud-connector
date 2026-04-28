@@ -17,11 +17,9 @@ public class CIExecutor {
             ProcessBuilder builder = new ProcessBuilder(
                     "git", "clone", repoUrl, dir
             );
-//            builder.inheritIO();
 
             builder.redirectErrorStream(true);
             Process process = builder.start();
-//            int exitCode = process.waitFor();
 
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream())
