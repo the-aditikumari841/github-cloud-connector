@@ -66,6 +66,12 @@ public class GithubClient {
                 .header("Authorization", "Bearer " + tokenProvider.getToken())
                 .bodyValue(Map.of("body", comment))
                 .retrieve()
+                .onStatus(status -> status.isError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException(
+                                        "GitHub API error: " + response.statusCode().value() + ":" + errorBody
+                                ))
+                )
                 .bodyToMono(Void.class)
                 .block();
     }
