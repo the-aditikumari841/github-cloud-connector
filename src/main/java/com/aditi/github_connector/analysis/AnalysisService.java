@@ -15,17 +15,31 @@ public class AnalysisService {
     private final GithubClient githubClient;
 
     public void analyze(String owner, String repo, String cloneUrl, int prNumber){
-        System.out.println("Step 1: cloning repo... ");
-        String repoPath = ciExecutor.cloneRepo(cloneUrl);
 
-        System.out.println("Step 2: Running checkstyle... ");
-        String result = ciExecutor.runCheckStyle(repoPath);
+        String repoPath = null;
 
-        System.out.println("Step 3: Posting comment ");
-        String comment = formatComment(result);
+        try {
+            System.out.println("Step 1: cloning repo... ");
+            repoPath = ciExecutor.cloneRepo(cloneUrl);
 
-        githubClient.commentOnPr(owner, repo, prNumber, comment);
+            System.out.println("Step 2: Running checkstyle... ");
+            String checkstyleOutput = ciExecutor.runCheckStyle(repoPath);
 
+            System.out.println("Step 3: Posting comment ");
+            String comment = formatComment(checkstyleOutput);
+
+            githubClient.commentOnPr(owner, repo, prNumber, comment);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+
+        } finally {
+            if(repoPath != null){
+                System.out.println("Step 4: Cleaning up repo... ");
+                ciExecutor.deleteDirectory(repoPath);
+            }
+        }
     }
 
     private String formatComment(String result) {
@@ -92,30 +106,5 @@ public class AnalysisService {
                 + "**Total issues:** " + count + "\n\n"
                 + (count > 0 ? "**Issues:**\n" + issues : "")
                 + "\n---\n_Reviewed automatically by CI Bot_";
-    }
-
-    private void processIssue(String line, StringBuilder issues, Pattern pattern){
-        String cleaned = line.replaceFirst("\\[(WARN|ERROR)]\\s*", "");
-
-        Matcher matcher = pattern.matcher(cleaned);
-
-        if(matcher.find()){
-            String filePath = matcher.group(1);
-            String lineNo = matcher.group(2);
-            String colNo = matcher.group(3);
-            String message = matcher.group(4);
-
-            int lastSlash = Math.max(
-                    filePath.lastIndexOf("/"),
-                    filePath.lastIndexOf("\\")
-            );
-
-            String fileName = (lastSlash != -1)
-                    ? filePath.substring(lastSlash + 1)
-                    : filePath;
-
-            cleaned = fileName + ":" + lineNo + ":" + colNo + ": " + message;
-        }
-        issues.append("• ").append(cleaned).append("\n");
     }
 }

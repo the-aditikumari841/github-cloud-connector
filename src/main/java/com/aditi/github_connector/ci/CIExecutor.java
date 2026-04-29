@@ -4,7 +4,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class CIExecutor {
@@ -21,13 +26,13 @@ public class CIExecutor {
             builder.redirectErrorStream(true);
             Process process = builder.start();
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-            );
+            try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
             }
 
             int exitCode = process.waitFor();
@@ -65,15 +70,14 @@ public class CIExecutor {
 
             Process process = builder.start();
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-            );
-
             StringBuilder output = new StringBuilder();
-            String line;
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
 
-            while((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
             }
 
             int exitCode = process.waitFor();
@@ -89,6 +93,54 @@ public class CIExecutor {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Checkstyle execution failed: " + e.getMessage(), e);
+        }
+    }
+
+    public void deleteDirectory(String repoPath) {
+        try {
+            Path directory = Paths.get(repoPath);
+
+            if(!Files.exists(directory))
+                return;
+
+            AtomicBoolean  hasError = new AtomicBoolean(false);
+
+            System.out.println("Starting cleanup: " + repoPath);
+
+            Files.walk(directory)
+                    .sorted((a, b) -> b.compareTo(a))
+                    .forEach(p -> deleteWithRetry(p, hasError));
+
+            if(hasError.get()) {
+                System.out.println("Cleanup completed with some failures: " + repoPath);
+            } else {
+                System.out.println("Cleanup completed successfully: " + repoPath);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Delete directory failed: " + e.getMessage());
+        }
+    }
+
+    private void deleteWithRetry(Path repoPath, AtomicBoolean hasError) {
+        int attempts = 3;
+
+        while (attempts > 0) {
+            try {
+                Files.delete(repoPath);
+                return;
+            } catch (IOException e) {
+                attempts--;
+
+                if(attempts == 0) {
+                    hasError.set(true);
+                    System.out.println("Failed to delete: " + repoPath + " | " + e.getMessage());
+                } else {
+                    try {
+                        Thread.sleep(100);
+                    }  catch (InterruptedException ignored) {}
+                }
+            }
         }
     }
 }
