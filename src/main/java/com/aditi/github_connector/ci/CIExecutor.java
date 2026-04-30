@@ -9,18 +9,24 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class CIExecutor {
-    public String cloneRepo(String repoUrl) {
+    public String cloneRepo(String repoUrl, String branch) {
         String dir = System.getProperty("java.io.tmpdir")
                 + File.separator
                 + "repo-" + System.currentTimeMillis();
 
         try {
             ProcessBuilder builder = new ProcessBuilder(
-                    "git", "clone", repoUrl, dir
+                    "git",
+                    "clone",
+                    "--branch", branch,
+                    "--single-branch",
+                    repoUrl,
+                    dir
             );
 
             builder.redirectErrorStream(true);
@@ -96,6 +102,32 @@ public class CIExecutor {
         }
     }
 
+    public void checkoutCommit(String repoPath, String sha) {
+        try {
+            ProcessBuilder builder = new ProcessBuilder(
+                    "git", "checkout", sha
+            );
+
+            builder.directory(new File(repoPath));
+            builder.redirectErrorStream(true);
+
+            Process process = builder.start();
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+
+                while (reader.readLine() != null) {}
+            }
+
+            int exitCode = process.waitFor();
+            if(exitCode != 0) {
+                throw new RuntimeException("checkout failed with exit code " + exitCode);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("checkout failed: " + e.getMessage(), e);
+        }
+    }
+
     public void deleteDirectory(String repoPath) {
         try {
             Path directory = Paths.get(repoPath);
@@ -107,10 +139,10 @@ public class CIExecutor {
 
             System.out.println("Starting cleanup: " + repoPath);
 
-            Files.walk(directory)
-                    .sorted((a, b) -> b.compareTo(a))
-                    .forEach(p -> deleteWithRetry(p, hasError));
-
+            try(var paths = Files.walk(directory)) {
+                    paths.sorted(Comparator.reverseOrder())
+                        .forEach(p -> deleteWithRetry(p, hasError));
+            }
             if(hasError.get()) {
                 System.out.println("Cleanup completed with some failures: " + repoPath);
             } else {
@@ -138,7 +170,10 @@ public class CIExecutor {
                 } else {
                     try {
                         Thread.sleep(100);
-                    }  catch (InterruptedException ignored) {}
+                    }  catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
                 }
             }
         }

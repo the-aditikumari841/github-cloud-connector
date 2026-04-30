@@ -14,18 +14,22 @@ public class AnalysisService {
     private final CIExecutor ciExecutor;
     private final GithubClient githubClient;
 
-    public void analyze(String owner, String repo, String cloneUrl, int prNumber){
+    public void analyze(String owner, String repo, String cloneUrl,
+                        int prNumber, String branch, String sha) {
 
         String repoPath = null;
 
         try {
             System.out.println("Step 1: cloning repo... ");
-            repoPath = ciExecutor.cloneRepo(cloneUrl);
+            repoPath = ciExecutor.cloneRepo(cloneUrl, branch);
 
-            System.out.println("Step 2: Running checkstyle... ");
+            System.out.println("Step 2: checkout commit... ");
+            ciExecutor.checkoutCommit(repoPath, sha);
+
+            System.out.println("Step 3: Running checkstyle... ");
             String checkstyleOutput = ciExecutor.runCheckStyle(repoPath);
 
-            System.out.println("Step 3: Posting comment ");
+            System.out.println("Step 4: Posting comment ");
             String comment = formatComment(checkstyleOutput);
 
             githubClient.commentOnPr(owner, repo, prNumber, comment);
@@ -36,7 +40,7 @@ public class AnalysisService {
 
         } finally {
             if(repoPath != null){
-                System.out.println("Step 4: Cleaning up repo... ");
+                System.out.println("Step 5: Cleaning up repo... ");
                 ciExecutor.deleteDirectory(repoPath);
             }
         }
