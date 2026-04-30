@@ -72,7 +72,7 @@ public class AnalysisService {
     private List<Issue> filterIssues(List<Issue> issues, List<String> changedFiles) {
         return issues.stream()
                 .filter(issue -> changedFiles.stream().
-                        anyMatch(file -> issue.getFile().endsWith(file))).toList();
+                        anyMatch(file -> issue.getFile().replace("\\", "/").contains(file))).toList();
     }
 
     private String formatComment(List<Issue> issues) {
