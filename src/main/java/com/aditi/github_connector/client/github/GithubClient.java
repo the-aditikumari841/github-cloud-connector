@@ -75,4 +75,20 @@ public class GithubClient {
                 .bodyToMono(Void.class)
                 .block();
     }
+
+    public List<String> getChangedFiles(String owner, String repo, int prNumber) {
+        return webClient.get().uri("/repos/{owner}/{repo}/pulls/{prNumber}/files",
+                owner, repo, prNumber)
+                .header("Authorization", "Bearer " + tokenProvider.getToken())
+                .retrieve()
+                .onStatus(status -> status.isError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(errorBody -> new RuntimeException(
+                                        "GitHub API error: " + response.statusCode().value() + ":" + errorBody
+                                )))
+                .bodyToFlux(Map.class)
+                .map(file -> (String) file.get("filename"))
+                .collectList()
+                .block();
+    }
 }
