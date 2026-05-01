@@ -2,7 +2,7 @@ package com.aditi.github_connector.analysis.analyzer.impl;
 
 import com.aditi.github_connector.analysis.analyzer.Analyzer;
 import com.aditi.github_connector.analysis.model.Issue;
-import com.aditi.github_connector.analysis.parser.impl.RuffParser;
+import com.aditi.github_connector.analysis.parser.impl.DefaultTextParser;
 import com.aditi.github_connector.ci.CIExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import java.util.List;
 public class PythonAnalyzer implements Analyzer {
 
     private final CIExecutor ciExecutor;
-    private final RuffParser ruffParser;
+    private final DefaultTextParser defaultTextParser;
 
     @Override
     public boolean supports(String file) {
@@ -24,7 +24,7 @@ public class PythonAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze(String repoPath) {
         String output = ciExecutor.runRuff(repoPath);
-        return ruffParser.parse(output);
+        return defaultTextParser.parse(output);
 
     }
 }

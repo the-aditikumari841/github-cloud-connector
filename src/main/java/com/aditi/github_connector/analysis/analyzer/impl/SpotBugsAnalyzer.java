@@ -2,7 +2,7 @@ package com.aditi.github_connector.analysis.analyzer.impl;
 
 import com.aditi.github_connector.analysis.analyzer.Analyzer;
 import com.aditi.github_connector.analysis.model.Issue;
-import com.aditi.github_connector.analysis.parser.impl.DefaultTextParser;
+import com.aditi.github_connector.analysis.parser.impl.SpotBugsParser;
 import com.aditi.github_connector.ci.CIExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class JavaAnalyzer implements Analyzer {
+public class SpotBugsAnalyzer implements Analyzer {
 
     private final CIExecutor ciExecutor;
-    private final DefaultTextParser defaultTextParser;
+    private final SpotBugsParser spotBugsParser;
 
     @Override
     public boolean supports(String file) {
@@ -23,7 +23,7 @@ public class JavaAnalyzer implements Analyzer {
 
     @Override
     public List<Issue> analyze(String repoPath) {
-        String output = ciExecutor.runCheckStyle(repoPath);
-        return defaultTextParser.parse(output);
+        ciExecutor.runSpotBugs(repoPath);
+        return spotBugsParser.parse(repoPath);
     }
 }

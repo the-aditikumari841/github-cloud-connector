@@ -180,6 +180,47 @@ public class CIExecutor {
         }
     }
 
+    public String runSpotBugs(String repoPath) {
+        try {
+            File repoDir = new File(repoPath);
+
+            ProcessBuilder builder = new ProcessBuilder(
+                    "cmd", "/c",
+                    "mvn", "spotbugs:spotbugs"
+            );
+
+            builder.directory(repoDir);
+            builder.redirectErrorStream(true);
+
+            System.out.println("Running spotbugs...");
+            System.out.println("Working directory: " + repoDir.getAbsolutePath());
+
+            Process process = builder.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+            }
+
+            int exitCode = process.waitFor();
+            System.out.println("Spotbugs finished with exit code " + exitCode);
+
+            if (exitCode != 0) {
+                output.append("\nSpotbugs found issues\n");
+            }
+
+            return output.toString();
+
+        }  catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Spotbugs execution failed: " + e.getMessage(), e);
+        }
+    }
+
     public String runRuff(String repoPath) {
         try {
             File repoDir = new File(repoPath);
