@@ -12,7 +12,7 @@ public class TokenProvider {
     private String oauthToken;
 
     public String getToken() {
-        if(oauthToken != null) {
+        if (oauthToken != null) {
             System.out.println("Using OAuth Token");
             return oauthToken;
         }

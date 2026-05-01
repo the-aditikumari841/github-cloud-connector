@@ -3,8 +3,8 @@ package com.aditi.github_connector.service;
 import com.aditi.github_connector.client.auth.OAuthClient;
 import com.aditi.github_connector.util.TokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

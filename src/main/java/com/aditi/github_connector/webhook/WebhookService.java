@@ -13,16 +13,16 @@ public class WebhookService {
 
     public void process(String event, Map<String, Object> payload) {
 
-        if(!"pull_request".equals(event)) return;
+        if (!"pull_request".equals(event)) return;
 
-        if(payload.get("repository") == null) return;
-        if(payload.get("pull_request") == null) return;
+        if (payload.get("repository") == null) return;
+        if (payload.get("pull_request") == null) return;
 
         Map<String, Object> repo = (Map<String, Object>) payload.get("repository");
         Map<String, Object> pr = (Map<String, Object>) payload.get("pull_request");
         Map<String, Object> head = (Map<String, Object>) pr.get("head");
 
-        if(head == null) return;
+        if (head == null) return;
 
         String cloneUrl = (String) repo.get("clone_url");
         String fullName = (String) repo.get("full_name");
@@ -30,7 +30,7 @@ public class WebhookService {
         String branch = (String) head.get("ref");
         String sha = (String) head.get("sha");
 
-        if(branch == null || sha == null) return;
+        if (branch == null || sha == null) return;
 
         Number prNum = (Number) payload.get("number");
         int prNumber = prNum.intValue();

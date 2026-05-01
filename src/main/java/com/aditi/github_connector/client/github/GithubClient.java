@@ -78,7 +78,7 @@ public class GithubClient {
 
     public List<String> getChangedFiles(String owner, String repo, int prNumber) {
         return webClient.get().uri("/repos/{owner}/{repo}/pulls/{prNumber}/files",
-                owner, repo, prNumber)
+                        owner, repo, prNumber)
                 .header("Authorization", "Bearer " + tokenProvider.getToken())
                 .retrieve()
                 .onStatus(status -> status.isError(),

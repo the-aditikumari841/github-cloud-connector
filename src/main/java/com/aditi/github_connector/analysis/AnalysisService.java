@@ -17,7 +17,7 @@ import java.util.List;
 public class AnalysisService {
     private final CIExecutor ciExecutor;
     private final GithubClient githubClient;
-    private final AnalyzerFactory  analyzerFactory;
+    private final AnalyzerFactory analyzerFactory;
 
     public void analyze(String owner, String repo, String cloneUrl,
                         int prNumber, String branch, String sha) {
@@ -37,7 +37,7 @@ public class AnalysisService {
             System.out.println("Step 4: selecting analyzers... ");
             List<Analyzer> analyzers = analyzerFactory.getAnalyzers(changedFiles);
 
-            if(analyzers.isEmpty()) {
+            if (analyzers.isEmpty()) {
                 System.out.println("No analyzers found for changed files.");
                 return;
             }
@@ -62,7 +62,7 @@ public class AnalysisService {
             throw e;
 
         } finally {
-            if(repoPath != null){
+            if (repoPath != null) {
                 System.out.println("Step 8: cleaning up repo... ");
                 ciExecutor.deleteDirectory(repoPath);
             }
@@ -77,13 +77,13 @@ public class AnalysisService {
 
     private String formatComment(List<Issue> issues) {
 
-        if(issues.isEmpty()) {
+        if (issues.isEmpty()) {
             return "### Code Review Results \n\nNo issues found \n\n---";
         }
 
         StringBuilder commentBuilder = new StringBuilder();
 
-        for(int i = 0; i < Math.min(20, issues.size()); i++) {
+        for (int i = 0; i < Math.min(20, issues.size()); i++) {
             Issue issue = issues.get(i);
 
             String fileName = new File(issue.getFile()).getName();

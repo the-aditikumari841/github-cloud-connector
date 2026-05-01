@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class CheckstyleParser implements ToolParser {
+public class RuffParser implements ToolParser {
     private static final Pattern PATTERN = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
     @Override

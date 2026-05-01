@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface Analyzer {
     boolean supports(String fileName);
+
     List<Issue> analyze(String repoPath);
 }
