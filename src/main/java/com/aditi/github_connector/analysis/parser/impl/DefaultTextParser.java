@@ -10,8 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class CheckstyleParser implements ToolParser {
-    private static final Pattern PATTERN = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
+public class DefaultTextParser implements ToolParser {
+
+    public static final Pattern PATTERN = Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(.*)");
 
     @Override
     public List<Issue> parse(String output) {
