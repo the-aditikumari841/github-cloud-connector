@@ -2,7 +2,7 @@ package com.aditi.github_connector.analysis.analyzer.impl;
 
 import com.aditi.github_connector.analysis.analyzer.Analyzer;
 import com.aditi.github_connector.analysis.model.Issue;
-import com.aditi.github_connector.analysis.parser.impl.DefaultTextParser;
+import com.aditi.github_connector.analysis.parser.impl.GenericTextParser;
 import com.aditi.github_connector.ci.CIExecutor;
 import com.aditi.github_connector.config.AnalysisProperties;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class JavaAnalyzer implements Analyzer {
 
     private final CIExecutor ciExecutor;
-    private final DefaultTextParser defaultTextParser;
+    private final GenericTextParser genericTextParser;
     private final AnalysisProperties analysisProperties;
 
     @Override
@@ -27,7 +27,7 @@ public class JavaAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze(String repoPath) {
         String output = ciExecutor.runCheckStyle(repoPath);
-        List<Issue> issues = defaultTextParser.parse(output);
+        List<Issue> issues = genericTextParser.parse(output);
 
         issues.forEach(issue -> {
             String ruleId = extractRuleId(issue.getMessage());

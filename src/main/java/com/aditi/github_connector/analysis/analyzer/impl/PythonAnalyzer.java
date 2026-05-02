@@ -2,7 +2,8 @@ package com.aditi.github_connector.analysis.analyzer.impl;
 
 import com.aditi.github_connector.analysis.analyzer.Analyzer;
 import com.aditi.github_connector.analysis.model.Issue;
-import com.aditi.github_connector.analysis.parser.impl.DefaultTextParser;
+import com.aditi.github_connector.analysis.parser.impl.GenericTextParser;
+import com.aditi.github_connector.analysis.parser.impl.RuffJsonParser;
 import com.aditi.github_connector.ci.CIExecutor;
 import com.aditi.github_connector.config.AnalysisProperties;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class PythonAnalyzer implements Analyzer {
 
     private final CIExecutor ciExecutor;
-    private final DefaultTextParser defaultTextParser;
+    private final RuffJsonParser ruffJsonParser;
     private final AnalysisProperties analysisProperties;
 
     @Override
@@ -27,7 +28,7 @@ public class PythonAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze(String repoPath) {
         String output = ciExecutor.runRuff(repoPath);
-        List<Issue> issues = defaultTextParser.parse(output);
+        List<Issue> issues = ruffJsonParser.parse(output);
 
         issues.forEach(issue -> {
             String ruleId = extractRuleId(issue.getMessage());

@@ -231,7 +231,7 @@ public class CIExecutor {
                     "check",
                     ".",
                     "--output-format",
-                    "text"
+                    "json"
             );
 
             builder.directory(repoDir);
@@ -257,7 +257,7 @@ public class CIExecutor {
             System.out.println("Ruff finished with exit code " + exitCode);
 
             if (exitCode != 0) {
-                output.append("\n(Ruff found issues)");
+                System.out.println("Ruff found issues");
             }
 
             return output.toString();

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class SpotBugsParser implements ToolParser {
+public class SpotBugsXmlParser implements ToolParser {
 
     @Override
     public List<Issue> parse(String repoPath) {

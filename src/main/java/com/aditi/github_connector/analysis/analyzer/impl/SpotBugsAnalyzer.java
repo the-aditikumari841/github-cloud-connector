@@ -2,7 +2,7 @@ package com.aditi.github_connector.analysis.analyzer.impl;
 
 import com.aditi.github_connector.analysis.analyzer.Analyzer;
 import com.aditi.github_connector.analysis.model.Issue;
-import com.aditi.github_connector.analysis.parser.impl.SpotBugsParser;
+import com.aditi.github_connector.analysis.parser.impl.SpotBugsXmlParser;
 import com.aditi.github_connector.ci.CIExecutor;
 import com.aditi.github_connector.config.AnalysisProperties;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class SpotBugsAnalyzer implements Analyzer {
 
     private final CIExecutor ciExecutor;
-    private final SpotBugsParser spotBugsParser;
+    private final SpotBugsXmlParser spotBugsXmlParser;
     private final AnalysisProperties analysisProperties;
 
     @Override
@@ -27,7 +27,7 @@ public class SpotBugsAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze(String repoPath) {
         ciExecutor.runSpotBugs(repoPath);
-        List<Issue> issues = spotBugsParser.parse(repoPath);
+        List<Issue> issues = spotBugsXmlParser.parse(repoPath);
 
         issues.forEach(issue -> {
             String ruleId = issue.getRuleId();

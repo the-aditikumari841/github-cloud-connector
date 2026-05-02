@@ -116,10 +116,10 @@ public class AnalysisService {
                 commentBuilder.append("• ")
                         .append(fileName).append(":")
                         .append(issue.getLine())
-                        .append("\n Tool: ").append(issue.getTool())
+                        .append("\n  Tool: ").append(issue.getTool())
                         .append(" | Severity: ").append(issue.getSeverity())
                         .append(" | Rule: ").append(issue.getRuleId())
-                        .append("\n -> ").append(issue.getMessage())
+                        .append("\n  -> ").append(issue.getMessage())
                         .append("\n\n");
             }
         }
