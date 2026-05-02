@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,21 +86,43 @@ public class AnalysisService {
 
         StringBuilder commentBuilder = new StringBuilder();
 
-        for (int i = 0; i < Math.min(20, issues.size()); i++) {
-            Issue issue = issues.get(i);
+        Map<String, List<Issue>> issuesByTool = issues.stream()
+                .collect(Collectors.groupingBy(Issue::getTool));
 
-            String fileName = new File(issue.getFile()).getName();
+        List<String> toolOrder = List.of("SPOTBUGS", "RUFF", "CHECKSTYLE");
 
-            commentBuilder.append("• ")
-                    .append(fileName).append(":")
-                    .append(issue.getLine())
-                    .append("\n Tool: ").append(issue.getTool())
-                    .append(" | Severity: ").append(issue.getSeverity())
-                    .append(" | Rule: ").append(issue.getRuleId())
-                    .append("\n -> ").append(issue.getMessage())
-                    .append("\n\n");
+        Map<String, Integer> severityPriority = Map.of(
+                "HIGH", 3,
+                "MEDIUM", 2,
+                "LOW", 1
+        );
+
+        for (String tool : toolOrder) {
+            List<Issue> toolIssues = issuesByTool.get(tool);
+            if (toolIssues == null || toolIssues.isEmpty()) {
+                continue;
+            }
+
+            toolIssues.sort((a, b) ->
+                    severityPriority.getOrDefault(b.getSeverity(), 0)
+                            - severityPriority.getOrDefault(a.getSeverity(), 0)
+            );
+
+            for (int i = 0; i < Math.min(20, toolIssues.size()); i++) {
+                Issue issue = toolIssues.get(i);
+
+                String fileName = new File(issue.getFile()).getName();
+
+                commentBuilder.append("• ")
+                        .append(fileName).append(":")
+                        .append(issue.getLine())
+                        .append("\n Tool: ").append(issue.getTool())
+                        .append(" | Severity: ").append(issue.getSeverity())
+                        .append(" | Rule: ").append(issue.getRuleId())
+                        .append("\n -> ").append(issue.getMessage())
+                        .append("\n\n");
+            }
         }
-
         return "### Code Review Results\n\n"
                 + "**Issues in changed files:** " + issues.size() + "\n\n"
                 + commentBuilder
