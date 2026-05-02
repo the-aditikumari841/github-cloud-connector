@@ -32,7 +32,15 @@ public class AnalysisService {
             ciExecutor.checkoutCommit(repoPath, sha);
 
             System.out.println("Step 3: fetching changed files... ");
-            List<String> changedFiles = githubClient.getChangedFiles(owner, repo, prNumber);
+            List<String> changedFiles;
+
+            try {
+                changedFiles = githubClient.getChangedFiles(owner, repo, prNumber);
+            } catch (Exception e) {
+                System.out.println("Failed to fetch changed files from GitHub.");
+                e.printStackTrace();
+                return;
+            }
 
             System.out.println("Step 4: selecting analyzers... ");
             List<Analyzer> analyzers = analyzerFactory.getAnalyzers(changedFiles);
@@ -46,21 +54,29 @@ public class AnalysisService {
 
             System.out.println("Step 5: running analyzers... ");
             for (Analyzer analyzer : analyzers) {
-                issues.addAll(analyzer.analyze(repoPath));
+                try {
+                    issues.addAll(analyzer.analyze(repoPath));
+                } catch (Exception e) {
+                    System.out.println("Failed to analyze changed files from GitHub." + analyzer.getClass().getSimpleName());
+                    e.printStackTrace();
+                }
             }
-
             System.out.println("Step 6: filtering issues... ");
             List<Issue> filtered = filterIssues(issues, changedFiles);
 
             System.out.println("Step 7: posting comment... ");
             String comment = formatComment(filtered);
 
-            githubClient.commentOnPr(owner, repo, prNumber, comment);
+            try {
+                githubClient.commentOnPr(owner, repo, prNumber, comment);
+            } catch (Exception e) {
+                System.out.println("Failed to post comment on GitHub.");
+                e.printStackTrace();
+            }
 
         } catch (Exception e) {
             System.out.println("Error while analyzing: " + e.getMessage());
             e.printStackTrace();
-            throw e;
 
         } finally {
             if (repoPath != null) {
