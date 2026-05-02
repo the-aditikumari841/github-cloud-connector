@@ -272,6 +272,35 @@ public class CIExecutor {
         try {
             File repoDir = new File(repoPath);
 
+            System.out.println("Installing npm dependencies...");
+            ProcessBuilder installBuilder = new ProcessBuilder(
+                    "cmd", "/c",
+                    "npm", "install"
+            );
+
+            installBuilder.directory(repoDir);
+            installBuilder.redirectErrorStream(true);
+
+            Process installProcess = installBuilder.start();
+
+            StringBuilder installOutput = new StringBuilder();
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(installProcess.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    installOutput.append(line).append("\n");
+                }
+            }
+
+            int installExitCode = installProcess.waitFor();
+            System.out.println("NPM Install finished with exit code " + installExitCode);
+
+            if (installExitCode != 0) {
+                System.out.println("====NPM INSTALL ERROR====");
+                System.out.println(installOutput.toString());
+            }
+
             ProcessBuilder builder = new ProcessBuilder(
               "cmd", "/c",
                     "npx", "eslint",

@@ -19,6 +19,11 @@ public class EslintJsonParser implements ToolParser {
         List<Issue> issues = new ArrayList<>();
 
         try {
+
+            if(output == null || !output.trim().startsWith("[")) {
+                System.out.println("ESLint output is not JSON. Skipping parsing...");
+                return issues;
+            }
             JsonNode root = objectMapper.readTree(output);
 
             if (root.isArray()) {
