@@ -21,12 +21,12 @@ public class DefaultTextParser implements ToolParser {
         for (String line : output.split("\\r?\\n")) {
             Matcher matcher = PATTERN.matcher(line);
             if (matcher.find()) {
-                issues.add(new Issue(
-                        matcher.group(1),
-                        Integer.parseInt(matcher.group(2)),
-                        Integer.parseInt(matcher.group(3)),
-                        matcher.group(4)
-                ));
+                Issue issue = new Issue();
+                issue.setFile(matcher.group(1));
+                issue.setLine(Integer.parseInt(matcher.group(2)));
+                issue.setColumn(Integer.parseInt(matcher.group(3)));
+                issue.setMessage(matcher.group(4));
+                issues.add(issue);
             }
         }
         return issues;

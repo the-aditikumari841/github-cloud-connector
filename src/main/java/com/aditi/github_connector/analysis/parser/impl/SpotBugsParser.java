@@ -52,13 +52,18 @@ public class SpotBugsParser implements ToolParser {
 
                 String message = bugType + (shortMessage.isEmpty() ? "" : " : " + shortMessage);
 
-                issues.add(new Issue(filePath, lineNumber, 0, message));
-            }
+                Issue issue = new Issue();
+                issue.setFile(filePath);
+                issue.setLine(lineNumber);
+                issue.setColumn(0);
+                issue.setMessage(message);
+                issue.setRuleId(bugType);
+                issues.add(issue);
+}
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return issues;
     }
-
 }
