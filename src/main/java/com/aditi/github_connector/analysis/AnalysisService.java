@@ -78,7 +78,7 @@ public class AnalysisService {
     private String formatComment(List<Issue> issues) {
 
         if (issues.isEmpty()) {
-            return "### Code Review Results \n\nNo issues found \n\n---";
+            return "### Code Review Results \n\nNo issues found \n\n_Reviewed automatically by CI Bot_";
         }
 
         StringBuilder commentBuilder = new StringBuilder();
@@ -90,10 +90,12 @@ public class AnalysisService {
 
             commentBuilder.append("• ")
                     .append(fileName).append(":")
-                    .append(issue.getLine()).append(":")
-                    .append(issue.getColumn()).append(": ")
-                    .append(issue.getMessage())
-                    .append("\n");
+                    .append(issue.getLine())
+                    .append("\n Tool: ").append(issue.getTool())
+                    .append(" | Severity: ").append(issue.getSeverity())
+                    .append(" | Rule: ").append(issue.getRuleId())
+                    .append("\n -> ").append(issue.getMessage())
+                    .append("\n\n");
         }
 
         return "### Code Review Results\n\n"
