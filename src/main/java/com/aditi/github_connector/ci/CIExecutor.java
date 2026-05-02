@@ -272,10 +272,16 @@ public class CIExecutor {
         try {
             File repoDir = new File(repoPath);
 
-            System.out.println("Installing npm dependencies...");
+            File configFile = new File(repoDir, "eslint.config.mjs");
+            if(!configFile.exists()) {
+                System.out.println("No ESLint config file found. Skipping ESLint execution.");
+                return "[]";
+            }
+
+            System.out.println("Installing ESLint dependencies...");
             ProcessBuilder installBuilder = new ProcessBuilder(
                     "cmd", "/c",
-                    "npm", "install"
+                    "npm", "install", "eslint", "@eslint/js", "globals"
             );
 
             installBuilder.directory(repoDir);

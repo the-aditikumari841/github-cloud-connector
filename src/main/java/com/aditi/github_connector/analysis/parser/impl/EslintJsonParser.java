@@ -42,8 +42,9 @@ public class EslintJsonParser implements ToolParser {
                 }
             }
         } catch (Exception e) {
+            System.out.println("Failed to parse Eslint JSON. Skipping parsing...");
             e.printStackTrace();
-            throw new RuntimeException("Failed to parse Eslint JSON", e);
+            return issues;
         }
         return issues;
     }
