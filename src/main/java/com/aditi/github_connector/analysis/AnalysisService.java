@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +58,7 @@ public class AnalysisService {
             githubClient.commentOnPr(owner, repo, prNumber, comment);
 
         } catch (Exception e) {
+            System.out.println("Error while analyzing: " + e.getMessage());
             e.printStackTrace();
             throw e;
 
@@ -75,7 +73,11 @@ public class AnalysisService {
     private List<Issue> filterIssues(List<Issue> issues, List<String> changedFiles) {
         return issues.stream()
                 .filter(issue -> changedFiles.stream().
-                        anyMatch(file -> issue.getFile().replace("\\", "/").contains(file))).toList();
+                        anyMatch(file ->
+                                issue.getFile() != null &&
+                                issue.getFile().replace("\\", "/").endsWith(file)
+                        ))
+                .toList();
     }
 
     private String formatComment(List<Issue> issues) {
@@ -89,7 +91,10 @@ public class AnalysisService {
         Map<String, List<Issue>> issuesByTool = issues.stream()
                 .collect(Collectors.groupingBy(Issue::getTool));
 
-        List<String> toolOrder = List.of("SPOTBUGS", "RUFF", "CHECKSTYLE");
+        List<String> preferredToolOrder = List.of("SPOTBUGS", "RUFF", "ESLINT", "CHECKSTYLE");
+
+        Set<String> tools = new LinkedHashSet<>(preferredToolOrder);
+        tools.addAll(issuesByTool.keySet());
 
         Map<String, Integer> severityPriority = Map.of(
                 "HIGH", 3,
@@ -97,7 +102,7 @@ public class AnalysisService {
                 "LOW", 1
         );
 
-        for (String tool : toolOrder) {
+        for (String tool : tools) {
             List<Issue> toolIssues = issuesByTool.get(tool);
             if (toolIssues == null || toolIssues.isEmpty()) {
                 continue;
@@ -111,7 +116,9 @@ public class AnalysisService {
             for (int i = 0; i < Math.min(20, toolIssues.size()); i++) {
                 Issue issue = toolIssues.get(i);
 
-                String fileName = new File(issue.getFile()).getName();
+                String fileName = issue.getFile() != null
+                        ? new File(issue.getFile()).getName()
+                        : "Unknown";
 
                 commentBuilder.append("• ")
                         .append(fileName).append(":")

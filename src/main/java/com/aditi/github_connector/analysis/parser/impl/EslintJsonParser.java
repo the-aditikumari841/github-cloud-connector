@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class RuffJsonParser implements ToolParser {
+public class EslintJsonParser implements ToolParser {
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -20,26 +21,24 @@ public class RuffJsonParser implements ToolParser {
         try {
             JsonNode root = objectMapper.readTree(output);
 
-            if(root.isArray()) {
-                for (JsonNode node : root) {
-                    Issue issue = new Issue();
+            if (root.isArray()) {
+                for (JsonNode fileNode : root) {
+                    String filePath = fileNode.path("filePath").asText();
 
-                    issue.setFile(node.path("filename").asText());
+                    for (JsonNode message : fileNode.path("messages")) {
+                        Issue issue = new Issue();
 
-                    JsonNode location = node.path("location");
-
-                    issue.setLine(location.path("row").asInt(-1));
-                    issue.setColumn(location.path("column").asInt(-1));
-
-
-                    issue.setMessage(node.path("message").asText());
-
-                    issues.add(issue);
+                        issue.setFile(filePath);
+                        issue.setLine(message.path("line").asInt(-1));
+                        issue.setColumn(message.path("column").asInt(-1));
+                        issue.setMessage(message.path("message").asText());
+                        issues.add(issue);
+                    }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to parse Ruff JSON", e);
+            throw new RuntimeException("Failed to parse Eslint JSON", e);
         }
         return issues;
     }
