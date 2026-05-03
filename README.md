@@ -1,243 +1,161 @@
-# GitHub Cloud Connector
+# Automated Multi-Language Code Review System
 
 ## 🚀 Overview
 
-This project is a **GitHub Cloud Connector** built using Spring Boot.
-It integrates with GitHub APIs to perform actions like fetching repositories and creating issues, supporting both **Personal Access Token (PAT)** and **OAuth-based authentication**.
+A CI-driven automated code review system that integrates with GitHub webhooks to analyze pull requests across multiple programming languages using static analysis tools.
 
-### [Project Demo Link](https://drive.google.com/file/d/1taCSWeITKRSFh6Oi-Jr3dH8zFr3EnoC4/view?usp=sharing)
+The system clones the repository, checks out the exact commit, runs language-specific analyzers, parses results, filters issues to only changed files, and posts structured review feedback directly on the pull request.
+
+---
+## ✨ Features
+
+- 🔍 Multi-language support (Java, Python, JavaScript/TypeScript)
+- ⚙️ CI-style execution pipeline (clone → analyze → comment)
+- 🧩 Pluggable analyzer-parser architecture
+- 📂 Analysis limited to changed files in PR
+- 📊 Severity mapping via configuration
+- 💬 Automated GitHub PR comments
+- 🔄 Webhook-driven execution
 
 ---
 
-The project demonstrates:
+## 🏗️ Architecture
 
-* External API integration (GitHub REST API)
-* Secure authentication using **Personal Access Token (PAT) and OAuth 2.0**
-* Clean architecture and modular design
-* Proper error handling
-* Dynamic token management (OAuth overrides PAT)
+```
+The system follows a pipeline-based architecture:
 
-
----
+GitHub Webhook  
+→ Webhook Service  
+→ Analysis Service  
+→ Analyzer Factory  
+→ Language-specific Analyzers  
+→ CI Executor (runs tools)  
+→ Parsers (JSON / XML / Text)  
+→ Issue Aggregation  
+→ Filter (changed files only)  
+→ GitHub Client → PR Comment
+```
 
 ## 🛠️ Tech Stack
 
-* Java 17
-* Spring Boot
-* Spring WebFlux (`WebClient`)
-* Maven
-* GitHub REST API
+- **Backend:** Spring Boot (Java), Maven
+- **CI Execution:** ProcessBuilder (CLI tools)
+- **Static Analysis Tools:**
+    - ESLint (JavaScript/TypeScript)
+    - Ruff (Python)
+    - Checkstyle (Java)
+    - SpotBugs (Java)
+- **API Integration:** GitHub REST API (WebClient)
+- **Authentication:** OAuth + Personal Access Token (PAT)
 
 ---
+## 🔄 Workflow
 
-## 🔐 Authentication
-
-This project uses **two authentication methods** : GitHub Personal Access Token and GitHub OAuth. 
+1. GitHub sends a `pull_request` webhook
+2. Repository is cloned locally
+3. Specific commit (SHA) is checked out
+4. Changed files are fetched via GitHub API
+5. Relevant analyzers are selected dynamically
+6. Static analysis tools are executed
+7. Outputs are parsed into a unified `Issue` model
+8. Issues are filtered to only changed files
+9. A formatted review comment is posted on the PR
+10. Temporary repository is cleaned up
 
 ---
+## 🔌 Setup Instructions
 
-### **GitHub Personal Access Token (PAT)** 
-It is used as default authentication.
-
-
-The token is **not hardcoded** and is loaded securely via environment variables.
-
-### Set Token (Windows PowerShell)
+### **1. Clone the repository** 
 
 ```powershell
-setx GITHUB_TOKEN "your_token_here"
+git clone https://github.com/the-aditikumari841/multi-lang-code-review-system
+cd multi-lang-code-review-system
 ```
 
-### application.yml
+### **2. Configure environment variables**
 
-```yaml
-github:
-  token: ${GITHUB_TOKEN}
+```
+GITHUB_TOKEN=your_personal_access_token
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
 ```
 ---
-### **GitHub OAuth (Authorization Code Flow)** 
-OAuth allows users to securely log in via GitHub.
-
-#### Steps:
-1. After running the application, Open in browser:```http://localhost:8080/auth/github/login```
-2. Authorize the application on GitHub redirects to:```/auth/github/callback```
-3. Access token is fetched and stored in memory
-🔁 Token Priority
-
-OAuth Token (if available) → used  
-Else → PAT Token used
-
----
-
-## 📌 API Endpoints
-
-### 🔐 OAuth Endpoints
-
-#### 1. Initiate GitHub Login
-
-Redirects user to GitHub for authorization.
-```
-GET /auth/github/login
-```
-
-#### 2. OAuth Callback
-
-Handles GitHub callback and exchanges code for access token.
-```
-GET /auth/github/callback?code=...
-```
-Response:
-```
-OAuth Success! Token stored.
-```
-### 📦 GitHub API Endpoints
-#### 1. Get Public Repositories
-
-Fetch repositories of any GitHub user.
+### **3. Run the application** 
 
 ```
-GET /github/repos/{username}
-```
-
-Example:
-
-```
-GET /github/repos/octocat
+./mvnw spring-boot:run
 ```
 
 ---
 
-### 2. Get Authenticated User Repositories
+### **4. Expose webhook endpoint**
 
-Fetch repositories of the authenticated user (requires valid PAT or OAuth login).
-
+Use ngrok or similar:
 ```
-GET /github/my-repos
+ngrok http 8080
 ```
+Set webhook URL in GitHub:
+```
+http://<ngrok-url>/webhook/github
+```
+---
+## ⚠️ Limitations
+- Runs analysis on the entire repository (filtered later)
+- No parallel execution of analyzers (can be optimized)
+- No persistence layer for storing results
+- Executes tools on untrusted repositories (security considerations)
 
 ---
 
-### 3. Create Issue
+## 🚀 Future Improvements
 
-Create a new issue in Github repository.
+- Parallel analyzer execution
+- Inline PR comments (per file/line)
+- Analyze only changed files directly
+- Add database for history and analytics
+- Code quality scoring system
+- Dockerized sandbox execution for security
 
-⚠️ This action requires proper permissions. 
+## 🧠 Key Learnings
 
-You can create issues only if:
-
-* The repository allows issues,
-* And You have access (owner/collaborator) or the repository is public
-```
-POST /github/issues
-```
-
-Request Body:
-
-```json
-{
-  "owner": "your-username",
-  "repo": "your-repo",
-  "title": "Issue title",
-  "body": "Issue description"
-}
-```
-
+- Designed a scalable, pluggable architecture for multi-language code analysis
+- Built end-to-end webhook-driven CI workflows with GitHub API and OAuth
+- Unified heterogeneous tool outputs (JSON/XML/Text) into a standardized model
 ---
+## 🤝 Contributing
 
-## ⚠️ Error Handling
+Feel free to open issues or submit pull requests for improvements.
 
-The application handles GitHub API errors in a structured and consistent way.
-
-It uses:
-
-* WebClient (.onStatus()) to capture errors returned by the GitHub API 
-* A centralized GlobalExceptionHandler to format and return clean responses to the client.
-
-The following HTTP errors are properly propagated:
-
-* **401 Unauthorized** : Invalid or missing token (PAT or OAuth)
-* **403 Forbidden** : Permission issues or insufficient access rights
-* **404 Not Found** : Repository or resource does not exist
-* **422 Unprocessable Entity** : Invalid request data (e.g., missing title while creating an issue)
-
-🔐 With OAuth enabled, the same error handling applies.
-Errors related to invalid or expired OAuth tokens are also handled in the same flow, ensuring consistent responses across both authentication methods.
-
----
 
 ## 📂 Project Structure
 
 ```
-controller/    → REST endpoints (GithubController, OAuthController)
-service/       → Business logic  (GitHub operations, OAuth flow handling)
-client/
-├── github/    → GitHub API client (repo, issues)
-└── auth/      → OAuth client (token exchange)
-config/        → WebClient configuration  
-dto/
-├── request/   → Request payloads  
-└── response/  → Response models
-exception/     → Global exception handling  
-util/          → Utility classes (TokenProvider for PAT + OAuth token management)
+src/main/java/com/aditi/githubreviewbot
+├── analysis
+│   ├── analyzer            Language-specific analyzers (ESLint, Ruff, Checkstyle, SpotBugs)
+│   ├── parser              Parses tool outputs (JSON, XML, Text)
+│   ├── model               Unified Issue model
+│   ├── AnalysisService     Core orchestration logic
+│   └── AnalyzerFactory     Selects analyzers based on file types
+├── ci
+│   └── CIExecutor          Executes CLI tools (mvn, ruff, eslint, etc.)
+├── client
+│   ├── github              GitHub API integration
+│   └── auth                OAuth token exchange
+├── controller
+│   ├── GithubController    Exposes APIs for repo and issue operations
+│   └── OAuthController     REST endpoints
+├── service
+│   ├── GithubService       Business logic for GitHub operations (repos, issues)
+│   └── OAuthService        Business logic layer
+├── webhook
+│   ├── WebhookController
+│   └── WebhookService      Handles GitHub webhook events
+├── config                  Configuration (WebClient, properties)
+├── dto                     Request/Response models
+├── exception               Global exception handling
+└── util                    Utility classes (TokenProvider)
 ```
----
-
-
-## ▶️ How to Run
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/the-aditikumari841/github-cloud-connector.git
-```
-2. Navigate into the project directory:
-
-```bash
-cd github-cloud-connector
-```
-3. Set environment variable:
-
-* For Personal Access Token (PAT):
-
-```powershell
-setx GITHUB_TOKEN "your_token_here"
-```
-* For OAuth (GitHub App credentials):
-```
-setx GITHUB_CLIENT_ID "your_client_id"
-setx GITHUB_CLIENT_SECRET "your_client_secret"
-```
-⚠️ Note: Restart your terminal and IDE after setting environment variables.
-4. Run the application:
-
-```bash
-mvn spring-boot:run
-```
-
-5. Access APIs at:
-
-```
-http://localhost:8080
-```
-
----
-
-## ✅ Features Implemented
-
-* Fetch public repositories of any Github user
-* Fetch repositories of authenticated Github user (via PAT or OAuth)
-* Create GitHub issues (with proper repository permissions)
-* OAuth 2.0 integration (Github login flow)
-* Centralized token management (PAT + OAuth support via TokenProvider)
-* Global exception handling for GitHub API responses
----
-
-## 🎯 Future Enhancements 
-
-* Integrate Spring Security to standardize authentication and authorization
-* Extend OAuth flow with refresh tokens / session management
-* Enhance role-based access control (RBAC) for fine-grained permissions
-* Add pagination for scalable API responses
 
 ---
 
