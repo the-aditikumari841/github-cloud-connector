@@ -36,6 +36,8 @@ public class AnalysisService {
 
             try {
                 changedFiles = githubClient.getChangedFiles(owner, repo, prNumber);
+                System.out.println("Changed files from GitHub: ... ");
+                changedFiles.forEach(System.out::println);
             } catch (Exception e) {
                 System.out.println("Failed to fetch changed files from GitHub.");
                 e.printStackTrace();
@@ -44,6 +46,11 @@ public class AnalysisService {
 
             System.out.println("Step 4: selecting analyzers... ");
             List<Analyzer> analyzers = analyzerFactory.getAnalyzers(changedFiles);
+
+            System.out.println("Selected analyzers: " +
+                    analyzers.stream()
+                            .map(a -> a.getClass().getSimpleName())
+                            .toList());
 
             if (analyzers.isEmpty()) {
                 System.out.println("No analyzers found for changed files.");
