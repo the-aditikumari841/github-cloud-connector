@@ -7,3 +7,20 @@ oauth:
     client-secret: ${GITHUB_CLIENT_SECRET:dummy}
     redirect-uri: http://localhost:8080/auth/github/callback
 
+analysis:
+  severity:
+
+    checkstyle:
+      MissingJavadocType: LOW
+      Indentation: LOW
+      PackageName: MEDIUM
+      CustomImportOrder: LOW
+
+    spotbugs:
+      NP_NULL_POINTER: HIGH
+      URF_UNREAD_FIELD: MEDIUM
+
+    ruff:
+      E111: HIGH
+      E302: LOW
+      F401: MEDIUM

@@ -1,0 +1,25 @@
+{
+  "name": "github-connector",
+  "version": "1.0.0",
+  "description": "This project is a **GitHub Cloud Connector** built using Spring Boot.\r It integrates with GitHub APIs to perform actions like fetching repositories and creating issues, supporting both **Personal Access Token (PAT)** and **OAuth-based authentication**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/the-aditikumari841/github-cloud-connector.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/the-aditikumari841/github-cloud-connector/issues"
+  },
+  "homepage": "https://github.com/the-aditikumari841/github-cloud-connector#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0"
+  }
+}
